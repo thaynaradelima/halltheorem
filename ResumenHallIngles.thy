@@ -1,4 +1,3 @@
-(*<*)
 theory ResumenHallIngles
   imports
   Main
@@ -10,74 +9,18 @@ begin
  
 definition system_representatives :: "('a \<Rightarrow> 'b set) \<Rightarrow> 'a set \<Rightarrow> ('a \<Rightarrow> 'b) \<Rightarrow> bool" where
 "system_representatives S I R  \<equiv> (\<forall>i\<in>I. (R i) \<in> (S i)) \<and> (inj_on R I)"
-text\<open>
-donde $(inj \text{-}on\,R\,  I)$ significa que la función $R$ es inyectiva sobre el conjunto $I$.
-\<close>
-text\<open>
-La condición de matrimonio para $S$ e $I$ se formaliza por la proposición, 
-$$\forall J\subseteq I.\, finite\, J \longrightarrow  card\, J\leq card\,
-\left ( \bigcup\, (S \text{ ' }  J)\right)$$
-donde $ S \text{ ' }  J = \{S\,x\,|\, x\in J\}$.
-\<close>
-text\<open>
-Teniendo en cuenta lo anterior, formalizamos en Isabelle el enunciado del teorema de Hall de la
-siguiente manera:
-\<close>
-text\<open>
-\textit{
-\isacommand{theorem}\isamarkupfalse%
-\ SDR{\isacharcolon}\isanewline
-\ \ \isakeyword{fixes}\ S\ {\isacharcolon}{\isacharcolon}\ {\isachardoublequoteopen}
-{\isacharprime}a\ {\isasymRightarrow}\ {\isacharprime}b\ set{\isachardoublequoteclose}
-\ \isakeyword{and}\ I\ \ {\isacharcolon}{\isacharcolon}\ {\isachardoublequoteopen}
-{\isacharprime}a\ set{\isachardoublequoteclose}\isanewline
-\ \ \isakeyword{assumes}\isanewline
-\ {\isachardoublequoteopen}\ {\isasymexists}g{\isachardot}
- enumeration\ {\isacharparenleft}g{\isacharcolon}{\isacharcolon}\ nat\ {\isasymRightarrow}
-{\isacharprime}a{\isacharparenright}{\isachardoublequoteclose}\ \isakeyword{and}
- {\isachardoublequoteopen}{\isasymexists}h{\isachardot}\ enumeration
- {\isacharparenleft}h{\isacharcolon}{\isacharcolon}\ nat\ {\isasymRightarrow}
-{\isacharprime}b{\isacharparenright}{\isachardoublequoteclose}\ \isanewline
-\ \ \isakeyword{and}\ {\isachardoublequoteopen}{\isasymforall}i{\isasymin}I{\isachardot}
- finite\ {\isacharparenleft}S\ i{\isacharparenright}{\isachardoublequoteclose}\isanewline
-\ \ \isakeyword{and}\ {\isachardoublequoteopen}{\isasymforall}J{\isasymsubseteq}I{\isachardot}
- finite\ J\ {\isasymlongrightarrow}\ card\ J\ {\isasymle}\ card\ {\isacharparenleft}
-{\isasymUnion}\ {\isacharparenleft}S\ {\isacharbackquote}\ J{\isacharparenright}
-{\isacharparenright}{\isachardoublequoteclose}\isanewline
-\ \ \isakeyword{shows}\ {\isachardoublequoteopen}{\isasymexists}R{\isachardot}
- sistema{\isacharunderscore}representantes\ S\ I\ R{\isachardoublequoteclose}
-}
-\<close>
-(*<*)
+
 definition set_to_list :: "'a set \<Rightarrow> 'a list"
   where "set_to_list s =  (SOME l. set l = s)"
-
-(*fun set_to_listD :: "'a set \<Rightarrow> 'a list"
-  where
-  "set_to_listD S} =  []"   
-|  "set_to_listD {a} = [a]"
-| "set_to_listD S = ( l. set l = S)" *)
 
 lemma  set_set_to_list:
    "finite s \<Longrightarrow> set (set_to_list s) = s"
   unfolding set_to_list_def by (metis (mono_tags) finite_list some_eq_ex)
 
-thm finite_list
-print_statement  finite_list
-
-thm some_eq_ex
-print_statement some_eq_ex 
-(*  "P (SOME x. P x) = (\<exists>x. P x) *) (* P(t): set t = s "P (SOME x. P x) = P(SOME x. set x = s) = set (SOME x. set x = s) = s *)
-
 lemma list_to_set:
   assumes "finite (S i)"
   shows "set (set_to_list (S i)) = (S i)" 
   using assms  set_set_to_list  by auto
-(*>*)
-text\<open>
-Las siguientes definiciones en Isabelle  corresponden a la formalización de los conjuntos
- $\mathcal{F}, \mathcal{G}, \mathcal{H}$ y $\mathcal{T}$ respectivamente.
-\<close>
 
 primrec disjunction_atomic :: "'b list \<Rightarrow>'a \<Rightarrow> ('a \<times> 'b)formula"  where
  "disjunction_atomic [] i = FF"   
