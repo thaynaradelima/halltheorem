@@ -1,0 +1,1284 @@
+(*<*)
+theory ResumenHallIngles
+  imports
+  Main
+  Marriage
+"TeoriaCompacidadIngles"
+(*
+"/home/usuario/Escritorio/Teorias/TeoremaCompacidad/TeoriaCompacidad"
+"/Teorias/TeoremaCompacidad/TeoriaCompacidad" *)
+begin
+(*>*)
+section \<open>Teorema de Hall\<close>
+text\<open>
+Sea $\mathcal{A}$ una familia finita  de subconjuntos arbitrarios de un conjunto $S$ tal que los
+conjuntos de la colección  pueden repetirse.
+El teorema de Hall (teorema del matrimonio) demostrado por Philip Hall en 1935 \textcolor{blue}{\cite{Hall}},
+establece una condición necesaria y suficiente para poder seleccionar  de cada conjunto de la colección
+un elemento distinto. Este teorema es equivalente a otros seis resultados importantes que se aplican
+en el estudio de problemas combinatorios y de teoría de grafos \textcolor{blue}{\cite{Borgersen}}: 
+teorema de Menger (1929),
+teorema de König para matrices (1931), el teorema König–Egerváry (1931),
+ el teorema Birkhoff-Von Neumann (1946), teorema de Dilworth’s (1950) y el teorema del flujo máximo
+y corte mínimo, Max Flow-Min Cut (algoritmo de Ford-Fulkerson) (1962). 
+\par
+La manera usual de enunciar el teorema de Hall es utilizando el concepto de
+{\emph{sistema de representantes distintos}} para una familia de conjuntos.
+\<close>
+
+text\<open>
+\begin{definicion}
+Sean  $S$ un conjunto y $\{S_i\}_{i\in I}$ una colección de subconjuntos de $S$ (no necesariamente distintos)
+con índices en el conjunto $I$.
+\par
+Una sucesión
+$(x_i)_{i\in I}$ es un sistema de representantes distintos (SDR) para 
+$\{S_i\}_{i\in I}$ si, 
+\begin{enumerate}
+\item Para todo $i \in I$, $x_i\in S_i$, y
+\item Para todo $i,j\in I$, si $i\neq j$ entonces $x_i\neq x_j$.
+\end{enumerate}
+En forma equivalente,
+\par
+Una función $f:I\to   \bigcup_{i\in I}S_i$ es un SDR para $\{S_i\}_{i\in I}$ si,
+\begin{enumerate}
+\item Para todo $i \in I$, $f(i)\in  S_i$, y
+\item $f$ es inyectiva.
+\end{enumerate} 
+\end{definicion}
+\<close>
+
+text\<open>
+\begin{teorema}[Teorema de Hall, caso finito]\label{HallFinito}
+Sean $S$ un conjunto y $n$ un entero positivo. Una colección 
+$\{S_1,S_2,\ldots , S_n\}$ de subconjuntos de $S$ tiene un SDR si y solamente si:
+\par
+ (M) Para cualquier $1\leq k \leq n$ y cualquier elección de $k$ índices distintos
+ $1\leq  i_1, \ldots , i_k \leq n$, se tiene que
+  $|S_{i_1}\cup \ldots  \cup S_{i_k}|\geq k$. 
+\end{teorema} 
+La condición $(M)$ para la existencia de un SDR es llamada la {\emph{condición de matrimonio}}.
+\<close>
+text\<open>
+El teorema sigue siendo válido si la colección $\{S_i\}_{i\in I}$ es una familia enumerable de conjuntos 
+finitos; otros casos son considerados y probados  en \textcolor{blue}{\cite{Rado}}. 
+\<close>
+text\<open>
+\begin{teorema}[Teorema de Hall, caso infinito enumerable]\label{HallInfinito}
+Sea $S$ un conjunto. Una colección $\{S_n\}_{n\in \mathbb{N}^{+}}$ de 
+subconjuntos finitos de $S$, tiene un SDR si y solamente si:
+\par
+ ($M^{ * }$) Para cualquier $k \in \mathbb {N}^{+}$ y cualquier elección de $k$ índices distintos
+ $i_1, \ldots , i_k \in \mathbb{N}^{+}$, se tiene que
+  $|S_{i_1}\cup \ldots \cup S_{i_k}|\geq k$.  
+\end{teorema}
+\<close>
+text\<open>
+Una descripción de la formalización en Isabelle/HOL del teorema de Hall para el caso finito 
+$\{S_1,S_2,\ldots , S_n\}$ en el que además los $S_i$  son finitos,
+aparece en Jiang y Nipkow \textcolor{blue}{\cite{Marriage-AFP}}. 
+En este trabajo formalizamos en Isabelle/HOL, para el  caso infinito enumerable, la  
+ suficiencia de la condición de matrimonio para la existencia de un SDR, $M^{ * }\Rightarrow \text{SDR}$.
+La demostración utiliza la formali\-zación de la versión finita de Jiang y Nipkow
+ \textcolor{blue}{ \cite{DBLP:conf/cpp/JiangN11}} y el Teorema de Compacidad, y está guiada por la 
+siguiente prueba informal.
+\<close>
+text\<open>
+{\bf{Prueba informal:}} Supongamos que la condición ($M^{ * }$) se cumple.
+\par
+Consideremos el lenguaje proposicional con símbolos proposicionales el conjunto,
+ $$\mathcal{P} = \{C_{n,x} \mid n\in \mathbb{N}^{+}, x\in S_{n} \}$$
+ donde $C_{n,x}$ es interpretado como ``se selecciona el elemento $x$ del conjunto $S_{n}$''.
+Los siguientes tres conjuntos de proposiciones permiten describir la existencia de un SDR para 
+$\{S_i\}_{i\in I}$.
+\begin{itemize}
+\item[1.] Se selecciona por lo menos un elemento de cada $S_n$:
+$$ \mathcal{F} =
+ \{\vee_{x\in S_{n}} C_{n, x}\mid n\in \mathbb{N}^{+}\},$$
+donde  $\vee_{x\in S_{n}}C_{n, x}$ es la disyunción de las fórmulas atómicas correspondientes a los
+elementos del conjunto  $S_{n}$, el cual por hipótesis es finito.
+\par
+\item[2.] Se selecciona a lo más  un elemento de cada $S_n$:
+$$ \mathcal{G} =\{ \neg (C_{n,x}\wedge C_{n,y})\mid  x, y \in S_n, x\neq y, n \in \mathbb{N}^{+}\}.$$
+\item[3.] No se selecciona  más de una vez un mismo elemento de  $\bigcup_{n \in \mathbb{N}^{+}}S_n$:
+$$ \mathcal{H} =\{\neg (C_{n,x}\wedge C_{m,x})\mid x\in S_n\cap S_m, n \neq m,  n, m\in \mathbb{N}^{+} \}.$$
+
+\end{itemize}
+
+Sea  $\mathcal{T} = \mathcal{F}  \cup \mathcal{G} \cup \mathcal{H}$, aplicamos el Teorema de Compacidad
+para demostrar que $\mathcal{T}$ es satisfiable.
+\par 
+Sea $\mathcal{T}_0$ cualquier subconjunto finito de $\mathcal{T}$ y sea 
+$I=\{i_1,\dots , i_m\}$ el corres\-pondiente  subconjunto finito
+de índices en $\mathbb{N}^{+}$ que son ``mencionados'' en $\mathcal{T}_0$, es decir,
+el conjunto de todos los índices $i\in \mathbb{N}^{+}$ tal que $C_{i,x}$
+para algún $x\in S_i$, ocurre en alguna fórmula de $\mathcal{T}_0$. 
+\par
+
+Consideremos la familia de conjuntos $\{S_{i_1},\dots , S_{i_m}\}$. Entonces, 
+$\mathcal{T}_0$ está contenido en el conjunto 
+$\mathcal{T}_1 = \mathcal{F}_0  \cup \mathcal{G}_0 \cup \mathcal{H}_0$ 
+donde,
+\begin{enumerate}
+\item
+$ \mathcal{F}_0 =
+\left  \{\vee_{x\in S_{n}} C_{n, x}\mid n\in I \right \},$
+\item
+$ \mathcal{G}_0 =\{ \neg (C_{n,x}\wedge C_{n,y})\mid  x, y \in S_n, x\neq y, n \in I\},$
+\item
+$ \mathcal{H}_0 =\{\neg (C_{n,x}\wedge C_{m,x})\mid x\in S_n\cap S_m, n \neq m,  n, m\in I \}.$
+\end{enumerate}
+
+Por hipótesis, $\{S_{i_1},\dots , S_{i_m}\}$ cumple la condición ($M^{ * }$) y en particular la 
+condición ($M$). 
+Luego por el Teorema de  Hall (versión finita) existe una función $f:I\to  \bigcup_{i\in I}S_i$ 
+tal que $f$ es un SDR para $\{S_{i_1},\dots , S_{i_m}\}$.
+\par 
+En consecuencia, un model para $\mathcal{T}_1$ es la interpretación 
+$v: \mathcal{P} \to \{\V,\F\}$ definida por, 
+
+$$ v(C_{n,x}) =  
+\begin{cases}
+                          \V, & \text{ si } n\in I\text{   y   } f(n) = x, \\
+                          \F, & \text{en caso contrario.}
+                         \end{cases}
+$$
+
+Es decir, se tiene que $v(F)=\V$ para toda fórmula  $F\in \mathcal{T}_1$, por ser $f$ un SDR de
+$\{S_{i_1},\dots , S_{i_m}\}$.
+\par 
+Luego, $\mathcal{T}_1$ es satisfiable y por tanto $T_0$ es satisfiable. De esta forma,
+$\mathcal{T}$ es finitamente satisfiable y por  consiguiente, por el Teorema de Compacidad,
+es satisfiable.
+
+Sea $I: \mathcal{P} \to  \{\V, \F\}$ un model de $\mathcal{T}$. 
+Definimos la función $f:\mathbb{N}^{+} \to  \bigcup_{ n \in \mathbb{N}^{+}} S_n$ por,
+  \[f(m) = x \text{ si y solamente si } I(C_{m,x})= \V. \]
+Entonces, 
+$f$ es un  SDR para $\{S_n\}_{n\in \mathbb{N}^{+}}:$
+\par
+Puesto que $\mathcal{F}$ y $\mathcal{G}$ son satisfiables, a cada  $m\in \mathbb{N}^{+}$ 
+le corresponde exactamente un elemento en  $S_m$ (es decir, $f$ es una función);
+además, como  $\mathcal{H}$ es satisfiable se tiene que $f$ es inyectiva.
+\<close>
+section \<open>Formalización\<close>
+text\<open>
+La formalización de la prueba descrita en la sección anterior consta de  250 líneas 
+(sin tener en cuenta lo correspondiente a la formalización del Teorema de Compacidad) que 
+incluyen 7 definiciones y 43 lemas.
+\par   
+A continuación describimos la especificación en Isabelle de las principales definiciones y resultados
+utilizados en  la demostración.
+\<close>
+text\<open>
+Representamos la colección enumerable  de conjuntos finitos  $\{S_n\}_{n\in \mathbb{N}^{+}}$  en HOL,
+de acuerdo a  \textcolor{blue}{ \cite{DBLP:conf/cpp/JiangN11}},
+por medio de  una función $S\, :: \,a \Rightarrow\,\, b\,\, set$ junto con un conjunto de índices 
+$I \, :: \,a\,\, set$, donde $a$ y $b$ son  tipos enumerables arbitrarios,
+tal que  para todo $i\in I$, el conjunto $(S\,\, i)$ es finito. 
+\par
+La formalización de un SDR para $S$ e $I$ es cualquier función $R\, :: \,a \Rightarrow\,\,  b\,\, set$
+que satisface el siguiente predicado.                
+\<close>
+ 
+definition system_representatives :: "('a \<Rightarrow> 'b set) \<Rightarrow> 'a set \<Rightarrow> ('a \<Rightarrow> 'b) \<Rightarrow> bool" where
+"system_representatives S I R  \<equiv> (\<forall>i\<in>I. (R i) \<in> (S i)) \<and> (inj_on R I)"
+text\<open>
+donde $(inj \text{-}on\,R\,  I)$ significa que la función $R$ es inyectiva sobre el conjunto $I$.
+\<close>
+text\<open>
+La condición de matrimonio para $S$ e $I$ se formaliza por la proposición, 
+$$\forall J\subseteq I.\, finite\, J \longrightarrow  card\, J\leq card\,
+\left ( \bigcup\, (S \text{ ' }  J)\right)$$
+donde $ S \text{ ' }  J = \{S\,x\,|\, x\in J\}$.
+\<close>
+text\<open>
+Teniendo en cuenta lo anterior, formalizamos en Isabelle el enunciado del teorema de Hall de la
+siguiente manera:
+\<close>
+text\<open>
+\textit{
+\isacommand{theorem}\isamarkupfalse%
+\ SDR{\isacharcolon}\isanewline
+\ \ \isakeyword{fixes}\ S\ {\isacharcolon}{\isacharcolon}\ {\isachardoublequoteopen}
+{\isacharprime}a\ {\isasymRightarrow}\ {\isacharprime}b\ set{\isachardoublequoteclose}
+\ \isakeyword{and}\ I\ \ {\isacharcolon}{\isacharcolon}\ {\isachardoublequoteopen}
+{\isacharprime}a\ set{\isachardoublequoteclose}\isanewline
+\ \ \isakeyword{assumes}\isanewline
+\ {\isachardoublequoteopen}\ {\isasymexists}g{\isachardot}
+ enumeration\ {\isacharparenleft}g{\isacharcolon}{\isacharcolon}\ nat\ {\isasymRightarrow}
+{\isacharprime}a{\isacharparenright}{\isachardoublequoteclose}\ \isakeyword{and}
+ {\isachardoublequoteopen}{\isasymexists}h{\isachardot}\ enumeration
+ {\isacharparenleft}h{\isacharcolon}{\isacharcolon}\ nat\ {\isasymRightarrow}
+{\isacharprime}b{\isacharparenright}{\isachardoublequoteclose}\ \isanewline
+\ \ \isakeyword{and}\ {\isachardoublequoteopen}{\isasymforall}i{\isasymin}I{\isachardot}
+ finite\ {\isacharparenleft}S\ i{\isacharparenright}{\isachardoublequoteclose}\isanewline
+\ \ \isakeyword{and}\ {\isachardoublequoteopen}{\isasymforall}J{\isasymsubseteq}I{\isachardot}
+ finite\ J\ {\isasymlongrightarrow}\ card\ J\ {\isasymle}\ card\ {\isacharparenleft}
+{\isasymUnion}\ {\isacharparenleft}S\ {\isacharbackquote}\ J{\isacharparenright}
+{\isacharparenright}{\isachardoublequoteclose}\isanewline
+\ \ \isakeyword{shows}\ {\isachardoublequoteopen}{\isasymexists}R{\isachardot}
+ sistema{\isacharunderscore}representantes\ S\ I\ R{\isachardoublequoteclose}
+}
+\<close>
+(*<*)
+definition set_to_list :: "'a set \<Rightarrow> 'a list"
+  where "set_to_list s =  (SOME l. set l = s)"
+
+(*fun set_to_listD :: "'a set \<Rightarrow> 'a list"
+  where
+  "set_to_listD S} =  []"   
+|  "set_to_listD {a} = [a]"
+| "set_to_listD S = ( l. set l = S)" *)
+
+lemma  set_set_to_list:
+   "finite s \<Longrightarrow> set (set_to_list s) = s"
+  unfolding set_to_list_def by (metis (mono_tags) finite_list some_eq_ex)
+
+thm finite_list
+print_statement  finite_list
+
+thm some_eq_ex
+print_statement some_eq_ex 
+(*  "P (SOME x. P x) = (\<exists>x. P x) *) (* P(t): set t = s "P (SOME x. P x) = P(SOME x. set x = s) = set (SOME x. set x = s) = s *)
+
+lemma list_to_set:
+  assumes "finite (S i)"
+  shows "set (set_to_list (S i)) = (S i)" 
+  using assms  set_set_to_list  by auto
+(*>*)
+text\<open>
+Las siguientes definiciones en Isabelle  corresponden a la formalización de los conjuntos
+ $\mathcal{F}, \mathcal{G}, \mathcal{H}$ y $\mathcal{T}$ respectivamente.
+\<close>
+
+primrec disjunction_atomic :: "'b list \<Rightarrow>'a \<Rightarrow> ('a \<times> 'b)formula"  where
+ "disjunction_atomic [] i = FF"   
+| "disjunction_atomic (x#D) i = (atom (i, x)) \<or>. (disjunction_atomic D i)"
+
+(* Mover para otra teoria*)
+
+lemma t_v_evaluation_disjunctions1:
+  assumes "t_v_evaluation I (disjunction_atomic (a # l) i) = Ttrue"
+  shows "t_v_evaluation I (atom (i,a)) = Ttrue \<or> t_v_evaluation I (disjunction_atomic l i) = Ttrue" 
+proof-
+  have
+  "(disjunction_atomic (a # l) i) = (atom (i,a)) \<or>. (disjunction_atomic l i)"
+    by auto
+  hence "t_v_evaluation I ((atom (i ,a)) \<or>. (disjunction_atomic l i)) = Ttrue" 
+    using assms by auto
+  thus ?thesis using ValoresDisyuncion by blast
+qed
+(* El siguiente lema se utiliza más adelante para demostrar el lema  existence_representantsn*)
+lemma t_v_evaluation_atom:
+  assumes "t_v_evaluation I (disjunction_atomic l i) = Ttrue"
+  shows "\<exists>x. x \<in> set l \<and> (t_v_evaluation I (atom (i,x)) = Ttrue)"
+proof-
+  have "t_v_evaluation I (disjunction_atomic l i) = Ttrue \<Longrightarrow>
+  \<exists>x. x \<in> set l \<and> (t_v_evaluation I (atom (i,x)) = Ttrue)"
+  proof(induct l)
+    case Nil
+    then show ?case by auto
+  next   
+    case (Cons a l)  
+    show  "\<exists>x. x \<in> set (a # l) \<and> t_v_evaluation I (atom (i,x)) = Ttrue"  
+    proof-
+      have
+      "(t_v_evaluation I (atom (i,a)) = Ttrue) \<or> t_v_evaluation I (disjunction_atomic l i)=Ttrue" 
+        using Cons(2) t_v_evaluation_disjunctions1[of I] by auto      
+      thus ?thesis
+    proof(rule disjE)
+      assume "t_v_evaluation I (atom (i,a)) = Ttrue"
+      thus ?thesis by auto
+    next
+      assume "t_v_evaluation I (disjunction_atomic l i) = Ttrue" 
+      thus ?thesis using Cons by auto    
+    qed
+  qed
+qed
+  thus ?thesis using assms by auto
+qed
+
+definition \<F> :: "('a \<Rightarrow> 'b set) \<Rightarrow> 'a set \<Rightarrow> (('a \<times> 'b)formula) set"  where
+   "\<F> S I  \<equiv> (\<Union>i\<in>I. { disjunction_atomic (set_to_list (S i)) i })"
+
+definition \<G> :: "('a \<Rightarrow> 'b set) \<Rightarrow> 'a set \<Rightarrow> ('a \<times> 'b)formula set"  where
+   " \<G> S I \<equiv> {\<not>.(atom (i,x) \<and>. atom(i,y))
+                         |x y i . x\<in>(S i) \<and> y\<in>(S i) \<and>  x\<noteq>y \<and> i\<in>I}"
+
+definition \<H> :: "('a \<Rightarrow> 'b set) \<Rightarrow> 'a set \<Rightarrow>('a \<times> 'b)formula set"  where
+   "\<H> S I \<equiv> {\<not>.(atom (i,x) \<and>. atom(j,x))
+                         | x i j. x \<in> (S i) \<inter> (S j) \<and> (i\<in>I \<and> j\<in>I \<and> i\<noteq>j)}"
+
+definition \<T> :: "('a \<Rightarrow> 'b set) \<Rightarrow> 'a set \<Rightarrow> ('a \<times> 'b)formula set"  where
+   "\<T> S I  \<equiv> (\<F> S I) \<union> (\<G> S I) \<union> (\<H> S I)" 
+
+text\<open>
+Definimos en Isabelle el conjunto de índices que ocurren en un conjunto de fórmulas de la siguiente 
+manera.
+\<close>  
+primrec indices_formula :: "('a \<times> 'b)formula  \<Rightarrow> 'a set" where
+  "indices_formula FF = {}"
+| "indices_formula TT = {}"
+| "indices_formula (atom P) =  {fst P}"
+| "indices_formula (\<not>. F) = indices_formula F"
+| "indices_formula (F \<and>. G) = indices_formula F \<union> indices_formula G"
+| "indices_formula (F \<or>. G) = indices_formula F \<union> indices_formula G"
+| "indices_formula (F \<rightarrow>. G) = indices_formula F \<union> indices_formula G"
+
+definition  indices_set_formulas :: "('a \<times> 'b)formula set  \<Rightarrow> 'a set" where
+"indices_set_formulas S = (\<Union>F\<in> S. indices_formula F)"
+(*<*)
+
+lemma finite_indices_formulas:
+  shows "finite (indices_formula F)"
+  by(induct F, auto)
+
+lemma finite_set_indices:
+  assumes  "finite S"
+  shows "finite (indices_set_formulas S)" 
+ using `finite S` finite_indices_formulas 
+  by(unfold indices_set_formulas_def, auto)
+
+lemma indices_disjunction:
+  assumes "F = disjunction_atomic L  i" and "L \<noteq> []"
+  shows "indices_formula F = {i}" 
+proof-
+  have  "(F = disjunction_atomic L  i  \<and>  L \<noteq> []) \<Longrightarrow> indices_formula F = {i}"
+  proof(induct L arbitrary: F)
+    case Nil hence False using assms by auto
+    thus ?case by auto
+  next
+    case(Cons a L)
+    assume "F = disjunction_atomic (a # L) i \<and> a # L \<noteq> []" 
+    thus ?case
+    proof(cases L)
+      assume "L = []"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
+      thus "indices_formula F = {i}" using Cons(2) by auto
+    next
+      show
+  "\<And>b list. F = disjunction_atomic (a # L) i \<and> a # L \<noteq> [] \<Longrightarrow> L = b # list \<Longrightarrow> 
+            indices_formula F = {i}" 
+        using Cons(1-2) by auto
+    qed
+  qed 
+  thus ?thesis using assms  by auto
+qed    
+
+lemma nonempty_set_list:
+  assumes "\<forall>i\<in>I. (S i)\<noteq>{}" and "\<forall>i\<in>I. finite (S i)"     
+  shows "\<forall>i\<in>I. set_to_list (S i)\<noteq>[]"  
+proof(rule ccontr)
+  assume "\<not> (\<forall>i\<in>I. set_to_list (S i) \<noteq> [])" 
+  hence "\<exists>i\<in>I. set_to_list (S i) = []" by auto 
+  hence "\<exists>i\<in>I. set(set_to_list (S i)) = {}" by auto
+  then obtain i where i: "i\<in>I" and  "set (set_to_list (S i)) = {}" by auto
+  thus False using list_to_set[of S i]  assms by auto
+qed
+
+lemma  at_least_subset_indices:
+  assumes "\<forall>i\<in>I. (S i)\<noteq>{}" and "\<forall>i\<in>I. finite (S i)"  
+  shows  "indices_set_formulas (\<F> S I) \<subseteq> I" 
+proof
+  fix i
+  assume hip: "i \<in> indices_set_formulas (\<F> S I)" show  "i \<in> I"
+  proof-  
+    have "i \<in> (\<Union>F\<in>(\<F> S I). indices_formula F)" using hip
+      by(unfold indices_set_formulas_def,auto)
+    hence "\<exists>F \<in> (\<F> S I). i \<in> indices_formula F" by auto
+    then obtain F where "F\<in>(\<F> S I)" and i: "i \<in> indices_formula F" by auto
+    hence "\<exists> k\<in>I. F = disjunction_atomic (set_to_list (S k)) k"
+      by (unfold \<F>_def, auto) 
+    then obtain k where
+    k: "k\<in>I" and "F = disjunction_atomic (set_to_list (S k)) k" by auto
+    hence "indices_formula F = {k}"
+      using assms  nonempty_set_list[of I S] 
+      indices_disjunction[OF `F = disjunction_atomic (set_to_list (S k))  k`]
+      by auto
+    hence "k = i" using i by auto
+    thus ?thesis using k by auto
+  qed
+qed
+
+lemma at_most_subset_indices:
+  shows "indices_set_formulas (\<G> S I) \<subseteq> I"
+proof
+  fix i
+  assume hip: "i \<in> indices_set_formulas (\<G> S I)" show  "i \<in> I"
+  proof-
+    have "i \<in> (\<Union>F\<in>(\<G> S I). indices_formula F)" using hip
+      by(unfold indices_set_formulas_def,auto)
+    hence "\<exists>F\<in>(\<G> S I). i \<in> indices_formula F" by auto
+    then obtain F where "F\<in>(\<G> S I)" and i: "i \<in> indices_formula F"
+      by auto
+    hence "\<exists>x y j. x\<in>(S j) \<and> y\<in>(S j) \<and> x\<noteq>y \<and> j\<in>I \<and> F = 
+           \<not>.(atom (j, x) \<and>. atom(j,y))"
+      by (unfold \<G>_def, auto)
+    then obtain x y j where "x\<in>(S j) \<and> y\<in>(S j) \<and> x\<noteq>y \<and> j\<in>I"
+      and "F = \<not>.(atom (j, x) \<and>. atom(j,y))"
+      by auto
+    hence "indices_formula F = {j} \<and> j\<in>I" by auto
+    thus "i \<in> I" using i by auto
+  qed
+qed
+
+lemma  different_subset_indices:
+  shows "indices_set_formulas (\<H> S I) \<subseteq> I" 
+proof
+  fix i
+  assume hip: "i \<in> indices_set_formulas (\<H> S I)" show "i \<in> I"
+  proof-
+    have "i \<in> (\<Union>F\<in>(\<H> S I). indices_formula F)" using hip
+      by(unfold indices_set_formulas_def,auto)
+    hence "\<exists>F\<in>(\<H> S I) . i \<in> indices_formula F" by auto
+    then obtain F where "F\<in>(\<H> S I)" and i: "i \<in> indices_formula F"
+      by auto
+    hence "\<exists> x j k. x \<in> (S j) \<inter> (S k) \<and> (j\<in>I \<and> k\<in>I \<and> j\<noteq>k) \<and> F =
+           \<not>.(atom (j,x) \<and>. atom(k,x))"
+      by (unfold \<H>_def, auto)
+    then obtain x j k
+      where "(j\<in>I \<and> k\<in>I \<and> j\<noteq>k) \<and> F = \<not>.(atom (j, x) \<and>. atom(k,x))"
+      by auto
+    hence u: "j\<in>I" and v: "k\<in>I" and "indices_formula F = {j,k}"
+      by auto
+    hence "i=j \<or> i=k"  using i by auto
+    thus "i \<in> I" using u v  by auto
+  qed
+qed
+
+lemma indices_union_sets:
+  shows "indices_set_formulas(A \<union> B) = (indices_set_formulas A) \<union> (indices_set_formulas B)"
+   by(unfold  indices_set_formulas_def, auto)
+
+lemma at_least_subset_subset_indices1:
+  assumes "F\<in>(\<F> S I)"
+  shows "(indices_formula F) \<subseteq> (indices_set_formulas (\<F> S I))"
+proof
+  fix i 
+  assume hip: "i \<in> indices_formula F"
+  show  "i \<in> indices_set_formulas (\<F> S I)"
+  proof-
+    have "\<exists>F. F\<in>(\<F> S I) \<and> i \<in> indices_formula F" using assms hip by auto
+    thus  ?thesis by(unfold indices_set_formulas_def, auto)
+  qed
+qed 
+
+lemma at_most_subset_subset_indices1:
+  assumes  "F\<in>(\<G> S I)"
+  shows "(indices_formula F) \<subseteq> (indices_set_formulas (\<G> S I))" 
+proof
+  fix i 
+  assume hip: "i \<in> indices_formula F"
+  show  "i \<in> indices_set_formulas (\<G> S I)"
+  proof-
+    have "\<exists>F. F\<in>(\<G> S I) \<and> i \<in> indices_formula F" using assms hip by auto
+    thus ?thesis by(unfold indices_set_formulas_def, auto)
+  qed
+qed
+
+lemma different_subset_indices1:
+  assumes  "F\<in>(\<H> S I)"
+  shows "(indices_formula F) \<subseteq> (indices_set_formulas (\<H> S I))" 
+proof
+  fix i 
+  assume hip: "i \<in> indices_formula F"
+  show  "i \<in> indices_set_formulas (\<H> S I)"
+  proof-
+    have "\<exists>F. F\<in>(\<H> S I) \<and> i \<in> indices_formula F" using assms hip by auto
+    thus ?thesis by(unfold indices_set_formulas_def, auto)
+  qed
+qed
+
+lemma all_subset_indices:
+  assumes  "\<forall>i\<in>I.(S i)\<noteq>{}" and "\<forall>i\<in>I. finite(S i)"
+  shows "indices_set_formulas (\<T> S I) \<subseteq> I"
+proof
+  fix i
+  assume hip: "i \<in> indices_set_formulas (\<T> S I)" show "i \<in> I"
+  proof-
+    have  "i \<in> indices_set_formulas ((\<F> S I) \<union> (\<G> S I)  \<union> (\<H> S I))"
+      using hip by (unfold \<T>_def,auto)
+    hence "i \<in> indices_set_formulas ((\<F> S I) \<union> (\<G> S I)) \<union>
+    indices_set_formulas(\<H> S I)"
+      using indices_union_sets[of "(\<F> S I) \<union> (\<G> S I)"] by auto
+    hence "i \<in> indices_set_formulas ((\<F> S I) \<union> (\<G> S I)) \<or> 
+    i \<in> indices_set_formulas(\<H> S I)"
+      by auto
+    thus ?thesis
+    proof(rule disjE)        
+      assume hip: "i \<in> indices_set_formulas (\<F> S I \<union> \<G> S I)"       
+      hence "i \<in> (\<Union>F\<in> (\<F> S I) \<union> (\<G> S I). indices_formula F)"
+        by(unfold  indices_set_formulas_def, auto)
+      then obtain F
+      where F: "F\<in>(\<F> S I) \<union> (\<G> S I)" and i: "i \<in> indices_formula F" by auto 
+      from F have  "(indices_formula F) \<subseteq> (indices_set_formulas (\<F> S I))
+      \<or> indices_formula F \<subseteq> (indices_set_formulas (\<G> S I))"
+        using at_least_subset_subset_indices1 at_most_subset_subset_indices1 by blast
+      hence "i \<in> indices_set_formulas (\<F> S I) \<or>
+               i \<in> indices_set_formulas (\<G> S I)"
+        using i by auto
+      thus "i \<in> I" 
+        using assms at_least_subset_indices[of I S] at_most_subset_indices[of S I] by auto
+      next
+      assume "i \<in> indices_set_formulas (\<H> S I)" 
+      hence
+      "i \<in> (\<Union>F\<in>(\<H> S I). indices_formula F)" 
+        by(unfold  indices_set_formulas_def, auto)
+      then obtain F where F:  "F\<in>(\<H> S I)" and i: "i \<in> indices_formula F"
+        by auto
+      from F have "(indices_formula F) \<subseteq> (indices_set_formulas (\<H> S I))"
+        using different_subset_indices1 by blast
+      hence "i \<in> indices_set_formulas (\<H> S I)" using i by auto
+      thus "i \<in> I" using different_subset_indices[of S I]
+        by auto
+    qed
+  qed
+qed
+
+lemma inclusion_indices:
+  assumes "S \<subseteq> H" 
+  shows  "indices_set_formulas S \<subseteq> indices_set_formulas H" 
+proof
+  fix i
+  assume "i \<in> indices_set_formulas S"
+  hence "\<exists>F. F \<in> S \<and> i \<in> indices_formula F"
+    by(unfold indices_set_formulas_def, auto) 
+  hence "\<exists>F. F \<in> H \<and> i \<in> indices_formula F" using assms by auto
+  thus  "i \<in> indices_set_formulas H" 
+    by(unfold indices_set_formulas_def, auto)
+qed
+
+lemma indices_subset_formulas:
+  assumes  "\<forall>i\<in>I.(S i)\<noteq>{}" and "\<forall>i\<in>I. finite(S i)" and "A \<subseteq> (\<T> S I)" 
+  shows "(indices_set_formulas A) \<subseteq> I" 
+proof-
+  have "(indices_set_formulas A) \<subseteq> (indices_set_formulas (\<T> S I))"
+    using assms(3) inclusion_indices by auto
+  thus ?thesis using assms(1-2) all_subset_indices[of I S] by auto
+qed
+
+lemma To_subset_all_its_indices:
+  assumes  "\<forall>i\<in>I. (S i)\<noteq>{}" and "\<forall>i\<in>I. finite (S i)" and  "To \<subseteq> (\<T> S I)"
+  shows "To \<subseteq> (\<T> S (indices_set_formulas To))"
+proof
+  fix F
+  assume hip: "F \<in> To" 
+  hence "F \<in> (\<T> S I)" using assms(3) by auto
+  hence "F \<in> (\<F> S I) \<union> (\<G> S I) \<union> (\<H> S I)" by(unfold \<T>_def,auto)
+  hence "F \<in> (\<F> S I) \<or> F \<in> (\<G> S I) \<or> F \<in> (\<H> S I)" by auto
+  thus "F\<in>(\<T> S (indices_set_formulas To))"  
+  proof(rule disjE)
+    assume "F \<in> (\<F> S I)"
+    hence "\<exists>i\<in>I. F =  disjunction_atomic (set_to_list (S i)) i" 
+      by(unfold \<F>_def,auto)
+    then obtain i
+      where i: "i\<in>I" and F: "F =  disjunction_atomic (set_to_list (S i)) i"
+      by auto
+    hence "indices_formula F = {i}"
+      using 
+      assms(1-2) nonempty_set_list[of I S] indices_disjunction[of F "(set_to_list (S i))" i ]
+      by auto
+    hence "i\<in>(indices_set_formulas To)" using hip
+      by(unfold indices_set_formulas_def,auto)
+    hence "F\<in>(\<F> S (indices_set_formulas To))" 
+      using F by(unfold \<F>_def,auto)
+    thus "F\<in>(\<T> S (indices_set_formulas To))"
+      by(unfold \<T>_def,auto)
+  next
+    assume "F \<in> (\<G> S I) \<or> F \<in> (\<H> S I)"
+    thus ?thesis
+    proof(rule disjE)
+      assume "F \<in> (\<G> S I)" 
+      hence "\<exists>x.\<exists>y.\<exists>i. F = \<not>.(atom (i,x) \<and>. atom(i,y)) \<and> x\<in>(S i) \<and>
+               y\<in>(S i) \<and>  x\<noteq>y \<and> i\<in>I"
+        by(unfold \<G>_def, auto)
+      then obtain x y i
+        where F1: "F = \<not>.(atom (i,x) \<and>. atom(i,y))" and
+                F2: "x\<in>(S i) \<and> y\<in>(S i) \<and>  x\<noteq>y \<and> i\<in>I"
+        by auto
+      hence "indices_formula F = {i}" by auto
+      hence "i\<in>(indices_set_formulas To)" using hip
+        by(unfold indices_set_formulas_def,auto)
+      hence "F\<in>(\<G> S (indices_set_formulas To))"
+        using F1 F2 by(unfold \<G>_def,auto)
+      thus "F\<in>(\<T> S (indices_set_formulas To))"  by(unfold \<T>_def,auto)
+    next
+      assume "F \<in> (\<H> S I)"
+      hence "\<exists>x.\<exists>i.\<exists>j. F = \<not>.(atom (i,x) \<and>. atom(j,x)) \<and> 
+              x \<in> (S i) \<inter> (S j) \<and> (i\<in>I \<and> j\<in>I \<and> i\<noteq>j)" 
+        by(unfold  \<H>_def, auto)
+      then obtain x i j
+        where F3: "F = \<not>.(atom (i,x) \<and>. atom(j,x))" and 
+                F4: " x \<in> (S i) \<inter> (S j) \<and> (i\<in>I \<and> j\<in>I \<and> i\<noteq>j)" 
+        by auto 
+      hence "indices_formula F = {i,j}" by auto
+      hence "i\<in>(indices_set_formulas To) \<and> j\<in>(indices_set_formulas To)" 
+        using hip by(unfold indices_set_formulas_def,auto)
+      hence "F\<in>(\<H> S (indices_set_formulas To))"
+        using F3 F4 by(unfold \<H>_def,auto)
+      thus "F\<in>(\<T> S (indices_set_formulas To))"  by(unfold \<T>_def,auto)
+    qed
+  qed
+qed
+
+lemma all_nonempty_sets:
+  assumes  "\<forall>i\<in>I. (S i)\<noteq>{}" and "\<forall>i\<in>I. finite (S i)" and "A \<subseteq> (\<T> S I)" 
+  shows   "\<forall>i\<in>(indices_set_formulas A). (S i)\<noteq>{}"
+proof-
+  have "(indices_set_formulas A)\<subseteq>I" 
+    using assms(1-3) indices_subset_formulas[of I S A] by auto
+  thus ?thesis using assms(1) by auto
+qed
+
+lemma all_finite_sets:
+  assumes  "\<forall>i\<in>I. (S i)\<noteq>{}" and "\<forall>i\<in>I. finite (S i)" and "A \<subseteq> (\<T> S I)" 
+shows  "\<forall>i\<in>(indices_set_formulas A). finite (S i)"
+proof-
+  have  "(indices_set_formulas A)\<subseteq>I" 
+    using assms(1-3) indices_subset_formulas[of I S A] by auto
+  thus  "\<forall>i\<in>(indices_set_formulas A). finite (S i)" using assms(2) by auto
+qed
+
+lemma all_nonempty_sets1:
+  assumes  "\<forall>J\<subseteq>I. finite J \<longrightarrow>  card J \<le> card (\<Union> (S ` J))"
+  shows "\<forall>i\<in>I. (S i)\<noteq>{}" using assms by auto
+(*>*)
+text\<open>
+El siguiente lema afirma que  para cualquier
+subconjunto finito de fórmulas $To\subseteq  (\mathcal{T}\, S\, I)$,
+si la correspondiente colección de subconjuntos finitos con índices en el conjunto
+$(indices\text{-}conjunto\text{-}formulas\,\, To)$  sa\-tisface la condición de
+matrimonio, entonces tiene un SDR.
+Para la demostración se utiliza la versión finita del teorema de Hall
+\textcolor{blue}{ \cite{DBLP:conf/cpp/JiangN11}}.
+\<close>
+lemma system_distinct_representatives_finite:
+  assumes
+  "\<forall>i\<in>I. (S i)\<noteq>{}" and "\<forall>i\<in>I. finite (S i)" and "To \<subseteq> (\<T> S I)"  and "finite To" 
+   and "\<forall>J\<subseteq>(indices_set_formulas To). card J \<le> card (\<Union> (S ` J))"
+ shows  "\<exists>R. system_representatives S (indices_set_formulas To) R" 
+(*<*)
+proof- 
+  have 1: "finite (indices_set_formulas To)"
+    using assms(4) finite_set_indices by auto
+  have  "\<forall>i\<in>(indices_set_formulas To). finite (S i)"
+    using all_finite_sets assms(1-3) by auto
+  hence  "\<exists>R. (\<forall>i\<in>(indices_set_formulas To). R i \<in> S i) \<and> 
+              inj_on R (indices_set_formulas To)" 
+    using 1 assms(5) marriage_HV[of "(indices_set_formulas To)" S] by auto
+  then obtain R 
+    where R: "(\<forall>i\<in>(indices_set_formulas To). R i \<in> S i) \<and> 
+              inj_on R (indices_set_formulas To)" by auto 
+  thus ?thesis by(unfold system_representatives_def, auto)
+qed
+(*>*)
+text\<open>
+El siguiente teorema afirma que si se tiene un sistema de representantes distintos $R$ para una colección
+de conjuntos finitos determinada por $A$ e $\mathcal{I}$, entonces cualquier subconjunto de fórmulas 
+ $X\subseteq (\mathcal{T}\, A\,\, \mathcal{I})$ es satisfiable.
+Un model para $X$ es la  siguiente interpretación de fórmulas.
+\<close>
+fun Hall_interpretation :: "('a \<Rightarrow> 'b set) \<Rightarrow> 'a set \<Rightarrow> ('a \<Rightarrow> 'b) \<Rightarrow> (('a \<times> 'b) \<Rightarrow> v_truth)"  where
+"Hall_interpretation A \<I> R = (\<lambda>(i,x).(if  i \<in> \<I> \<and> x \<in> (A i) \<and> (R i) = x  then Ttrue else Ffalse))"
+
+(* Traduction:  Verdad/Ttrue, Falso/Ffalse, valor/t_v_evaluation, v_verdad/v_truth *)
+
+(*<*)
+lemma t_v_evaluation_index:
+  assumes  "t_v_evaluation (Hall_interpretation S I R) (atom (i,x)) = Ttrue"
+  shows  "(R i) = x"
+proof(rule ccontr)
+  assume  "(R i) \<noteq> x" hence "t_v_evaluation (Hall_interpretation S I R) (atom (i,x)) \<noteq> Ttrue" 
+    by auto
+  hence "t_v_evaluation (Hall_interpretation S I R) (atom (i,x)) = Ffalse" 
+  using non_Ttrue[of "Hall_interpretation S I R" "atom (i,x)"] by auto 
+  thus False using assms by simp
+qed
+
+(* Traduction: non_Ttrue/non_Ttrue *)
+
+lemma distinct_elements_distinct_indices:
+  assumes "F = \<not>.(atom (i,x) \<and>. atom(i,y))" and "x\<noteq>y"  
+  shows "t_v_evaluation (Hall_interpretation S I R) F = Ttrue"
+proof(rule ccontr)
+  assume "t_v_evaluation (Hall_interpretation S I R) F \<noteq> Ttrue"
+  hence
+  "t_v_evaluation (Hall_interpretation S I R) (\<not>.(atom (i,x) \<and>. atom (i, y))) \<noteq> Ttrue" 
+    using assms(1) by auto
+  hence
+  "t_v_evaluation (Hall_interpretation S I R) (\<not>.(atom (i,x) \<and>. atom (i, y))) = Ffalse"
+    using
+  non_Ttrue[of "Hall_interpretation S I R" "\<not>.(atom (i,x) \<and>. atom (i, y))"]
+    by auto     
+  hence  "t_v_evaluation (Hall_interpretation S I R) ((atom (i,x) \<and>. atom (i, y))) = Ttrue" 
+    using
+  ValoresNegacion1[of "Hall_interpretation S I R" "(atom (i,x) \<and>. atom (i, y))"]
+    by auto
+  hence "t_v_evaluation (Hall_interpretation S I R) (atom (i,x)) = Ttrue" and
+  "t_v_evaluation (Hall_interpretation S I R) (atom (i, y)) = Ttrue"
+    using
+ ValoresConjuncion[of "Hall_interpretation S I R" "atom (i,x)" "atom (i, y)"]
+    by auto
+  hence "(R i)= x" and "(R i)= y" using t_v_evaluation_index by auto
+  hence "x=y" by auto
+  thus False using assms(2) by auto
+qed
+
+lemma same_element_same_index:
+  assumes
+  "F = \<not>.(atom (i,x) \<and>. atom(j,x))"  and "i\<in>I \<and> j\<in>I" and "i\<noteq>j" and "inj_on R I"
+  shows "t_v_evaluation (Hall_interpretation S I R) F = Ttrue"
+proof(rule ccontr)
+  assume "t_v_evaluation (Hall_interpretation S I R) F \<noteq> Ttrue"
+  hence  "t_v_evaluation (Hall_interpretation S I R) (\<not>.(atom (i,x) \<and>. atom (j,x))) \<noteq> Ttrue"
+    using assms(1) by auto
+  hence
+  "t_v_evaluation (Hall_interpretation S I R) (\<not>.(atom (i,x) \<and>. atom (j, x))) = Ffalse" using
+  non_Ttrue[of "Hall_interpretation S I R" "\<not>.(atom (i,x) \<and>. atom (j, x))" ]
+    by auto
+  hence  "t_v_evaluation (Hall_interpretation S I R) ((atom (i,x) \<and>. atom (j, x))) = Ttrue" 
+    using 
+ ValoresNegacion1[of "Hall_interpretation S I R" "(atom (i,x) \<and>. atom (j, x))"] 
+    by auto
+  hence "t_v_evaluation (Hall_interpretation S I R) (atom (i,x)) = Ttrue" and
+  "t_v_evaluation (Hall_interpretation S I R) (atom (j, x)) = Ttrue"
+    using ValoresConjuncion[of "Hall_interpretation S I R" "atom (i,x)" "atom (j,x)"]
+    by auto
+  hence  "(R i)= x"  and  "(R j)= x" using t_v_evaluation_index by auto
+  hence "(R i) = (R j)" by auto
+  hence "i=j" using  `i\<in>I \<and> j\<in>I` `inj_on R I` by(unfold inj_on_def, auto)
+  thus False using  `i\<noteq>j`  by auto
+qed
+
+lemma disjunctor_Ttrue_in_atomic_disjunctions:
+  assumes "x \<in> set l" and "t_v_evaluation I (atom (i,x)) = Ttrue"
+  shows "t_v_evaluation I (disjunction_atomic l i) = Ttrue"
+proof-
+  have "x \<in> set l \<Longrightarrow> t_v_evaluation I (atom (i,x)) = Ttrue \<Longrightarrow>
+  t_v_evaluation I (disjunction_atomic l i) = Ttrue" 
+  proof(induct l)
+    case Nil
+    then show ?case by auto
+  next
+    case (Cons a l)
+    then show  "t_v_evaluation I (disjunction_atomic (a # l) i) = Ttrue"
+    proof-
+      have "x = a \<or> x\<noteq>a" by auto
+      thus  "t_v_evaluation I (disjunction_atomic (a # l) i) = Ttrue"
+      proof(rule disjE)
+        assume "x = a"
+          hence
+          1:"(disjunction_atomic (a#l) i) = 
+             (atom (i,x)) \<or>. (disjunction_atomic l i)"
+          by auto 
+        have "t_v_evaluation I ((atom (i,x)) \<or>. (disjunction_atomic l i)) = Ttrue"  
+          using Cons(3)  by(unfold t_v_evaluation_def,unfold v_disjunction_def, auto)
+        thus ?thesis using 1  by auto
+      next
+        assume "x \<noteq> a"
+        hence "x\<in> set l" using Cons(2) by auto
+        hence "t_v_evaluation I (disjunction_atomic l i ) = Ttrue"
+          using Cons(1) Cons(3) by auto
+        thus ?thesis
+          by(unfold t_v_evaluation_def,unfold v_disjunction_def, auto)
+      qed
+    qed
+  qed
+  thus ?thesis using assms by auto
+qed
+
+lemma t_v_evaluation_disjunctions:
+  assumes  "finite (S i)"
+  and  "x \<in> (S i)  \<and>  t_v_evaluation I (atom (i,x)) = Ttrue" 
+  and  "F = disjunction_atomic (set_to_list (S i)) i " 
+  shows "t_v_evaluation I F = Ttrue"
+proof- 
+  have "set (set_to_list (S i)) = (S i)" 
+  using  set_set_to_list assms(1) by auto
+  hence "x \<in> set (set_to_list (S i))"
+    using assms(2) by auto
+  thus "t_v_evaluation I F = Ttrue"
+    using assms(2-3) disjunctor_Ttrue_in_atomic_disjunctions by auto
+qed
+(*>*)
+
+(* Traduction: satisfiable/satisfiable, model/model,
+    satisfiable_subset/satisfiable_subset,
+    satisfiable_def/satisfiable_def *)
+
+theorem SDR_satisfiable:
+  assumes "\<forall>i\<in>\<I>. (A i) \<noteq> {}"  and  "\<forall>i\<in>\<I>. finite (A i)" and  "X \<subseteq> (\<T> A \<I>)"
+  and  "system_representatives A \<I> R"  
+shows "satisfiable X"
+(*<*)
+proof- 
+  have "satisfiable (\<T> A \<I>)"
+  proof-
+    have "inj_on R \<I>" using assms(4) system_representatives_def[of A \<I> R] by auto
+    have "(Hall_interpretation A \<I> R) model (\<T> A \<I>)"
+    proof(unfold model_def) 
+      show "\<forall>F \<in> (\<T> A \<I>). t_v_evaluation (Hall_interpretation A \<I> R) F = Ttrue"
+      proof 
+        fix F assume "F \<in> (\<T> A \<I>)"
+        show  "t_v_evaluation (Hall_interpretation A \<I> R) F  = Ttrue"
+        proof-
+          have "F \<in> (\<F> A \<I>) \<union> (\<G> A \<I>) \<union> (\<H> A \<I>)" 
+            using  `F \<in> (\<T> A \<I>)` assms(3)  by(unfold \<T>_def,auto) 
+          hence  "F \<in> (\<F> A \<I>) \<or> F \<in> (\<G> A \<I>) \<or> F \<in> (\<H> A \<I>)" by auto  
+          thus ?thesis
+          proof(rule disjE) 
+            assume "F \<in> (\<F> A \<I>)"
+            hence "\<exists>i\<in>\<I>. F =  disjunction_atomic (set_to_list (A i)) i" 
+              by(unfold \<F>_def,auto)
+            then obtain i
+              where i: "i\<in>\<I>" and F: "F =  disjunction_atomic (set_to_list (A i)) i"
+              by auto
+            have 1: "finite (A i)" using i  assms(2) by auto
+            have 2: " i \<in> \<I> \<and> (R i) \<in> (A i)" 
+              using i assms(4) by (unfold system_representatives_def, auto)
+            hence "t_v_evaluation (Hall_interpretation A \<I> R) (atom (i,(R i))) = Ttrue"
+              by auto 
+            thus "t_v_evaluation (Hall_interpretation A \<I> R) F  = Ttrue"
+              using 1 2 assms(4) F           
+            t_v_evaluation_disjunctions
+            [of A i "(R i)" "(Hall_interpretation A \<I> R)" F]
+              by auto
+          next
+            assume "F \<in> (\<G> A \<I>) \<or> F \<in> (\<H> A \<I>)"
+            thus ?thesis
+            proof(rule disjE)
+              assume "F \<in> (\<G> A \<I>)"
+              hence
+            "\<exists>x.\<exists>y.\<exists>i. F = \<not>.(atom (i,x) \<and>. atom(i,y)) \<and> x\<in>(A i) \<and>
+              y\<in>(A i) \<and>  x\<noteq>y \<and> i\<in>\<I>"
+                by(unfold \<G>_def, auto)
+              then obtain x y i
+                where F: "F = \<not>.(atom (i,x) \<and>. atom(i,y))" 
+            and "x\<in>(A i) \<and> y\<in>(A i) \<and>  x\<noteq>y \<and> i\<in>\<I>"
+                by auto
+          thus "t_v_evaluation (Hall_interpretation A \<I> R) F  = Ttrue"
+            using `inj_on R \<I>` distinct_elements_distinct_indices[of F i x y A \<I> R] by auto
+          next
+              assume "F \<in> (\<H> A \<I>)"
+              hence "\<exists>x.\<exists>i.\<exists>j. F = \<not>.(atom (i,x) \<and>. atom(j,x)) \<and>
+                   x \<in> (A i) \<inter> (A j) \<and> (i\<in>\<I> \<and> j\<in>\<I> \<and> i\<noteq>j)" 
+                 by(unfold  \<H>_def, auto)
+              then obtain x i j
+              where "F = \<not>.(atom (i,x) \<and>. atom(j,x))"  and "(i\<in>\<I> \<and> j\<in>\<I> \<and> i\<noteq>j)" 
+                 by auto
+              thus "t_v_evaluation (Hall_interpretation A \<I> R) F  = Ttrue" using `inj_on R \<I>`
+              same_element_same_index[of F i x j \<I> ]  by auto             
+            qed
+          qed
+        qed
+      qed
+    qed
+    thus "satisfiable (\<T> A \<I>)" by(unfold satisfiable_def, auto)
+  qed 
+  thus "satisfiable X" using satisfiable_subset assms(3) by auto
+qed 
+(*>*)
+text\<open>
+Los anteriores dos resultados permiten demostrar que cualquier
+subconjunto finito de fórmulas  $To\subseteq  (\mathcal{T}\, S\, I)$  tal que
+la correspondiente colección de subconjuntos finitos cumplen la condición de matrimonio, es satisfiable.  
+\<close>
+lemma finite_is_satisfiable:
+  assumes
+  "\<forall>i\<in>I. (S i)\<noteq>{}" and "\<forall>i\<in>I. finite (S i)" and "To \<subseteq> (\<T> S I)"  and  "finite To"
+  and "\<forall>J\<subseteq>(indices_set_formulas To). card J \<le> card (\<Union> (S ` J))"
+shows  "satisfiable To"
+(*<*)
+proof- 
+  have 0: "\<exists>R. system_representatives S (indices_set_formulas To) R" 
+    using assms system_distinct_representatives_finite[of I S To] by auto
+  then obtain R
+    where R: "system_representatives S (indices_set_formulas To) R" by auto
+  have 1: "\<forall>i\<in>(indices_set_formulas To). (S i)\<noteq>{}" 
+    using assms(1-3) all_nonempty_sets  by blast
+  have 2: "\<forall>i\<in>(indices_set_formulas To). finite (S i)" 
+    using assms(1-3) all_finite_sets by blast
+  have 3: "To\<subseteq>(\<T> S (indices_set_formulas To))"
+    using assms(1-3) To_subset_all_its_indices[of I S To] by auto 
+  thus  "satisfiable To"
+    using  1 2 3 0 SDR_satisfiable by auto
+qed
+(*>*)
+text\<open>
+El anterior lemma junto con el Teorema de Compacidad permiten demostrar que el conjunto de fórmulas
+$(\mathcal{T}\, S\, I)$ es satisfiable.
+\<close>
+(*<*)
+ lemma diag_nat:
+  shows "\<forall>y z.\<exists>x. (y,z) = diag x" 
+  using enumeration_natxnat by(unfold enumeration_def,auto)
+
+(* Traduction: enumeration/enumeration *)
+(* Change the demonstration *)
+lemma EnumFormulasHall:
+  assumes "\<exists>g. enumeration (g:: nat \<Rightarrow>'a)" and "\<exists>h. enumeration (h:: nat \<Rightarrow>'b)"
+  shows "\<exists>f. enumeration (f:: nat \<Rightarrow>('a \<times>'b )formula)"
+proof-
+  from assms(1) obtain g where e1: "enumeration (g:: nat \<Rightarrow>'a)" by auto  
+  from assms(2) obtain h where e2: "enumeration (h:: nat \<Rightarrow>'b)" by auto  
+  have "enumeration ((\<lambda>m.(g(fst(diag m)),(h(snd(diag m))))):: nat \<Rightarrow>('a \<times>'b))"
+  proof(unfold enumeration_def) 
+    show  "\<forall>y::('a \<times> 'b). \<exists>m. y = (g (fst (diag m)), h (snd (diag m)))"  
+    proof
+      fix y::"('a \<times>'b )" 
+      show "\<exists>m. y = (g (fst (diag m)), h (snd (diag m)))"
+      proof-
+        have  "y = ((fst y), (snd y))" by auto
+        from e1 have  "\<forall>w::'a. \<exists>n1. w = (g n1)" by(unfold enumeration_def, auto)
+        hence "\<exists>n1. (fst y) = (g n1)" by auto
+        then obtain n1 where n1: "(fst y) = (g n1)" by auto 
+        from e2 have  "\<forall>w::'b. \<exists>n2. w = (h n2)" by(unfold enumeration_def, auto)
+        hence "\<exists>n2. (snd y) = (h n2)" by auto
+        then obtain n2 where n2: "(snd y) = (h n2)" by auto
+        have "\<exists>m. (n1, n2) = diag m" using diag_nat by auto
+        hence "\<exists>m. (n1, n2) = (fst (diag m), snd (diag m))" by simp
+        hence "\<exists>m.((fst y), (snd y)) = (g(fst (diag m)), h(snd (diag m)))"
+          using n1 n2 by blast
+        thus "\<exists>m. y = (g (fst (diag m)), h(snd (diag m)))" by auto
+      qed
+    qed
+  qed
+  thus "\<exists>f. enumeration (f:: nat \<Rightarrow>('a \<times>'b )formula)" 
+    using EnumeracionFormulasP1 by auto 
+qed
+(*>*)
+
+(* Translation:  Compactness_Theorem/Compacteness_Theorem *)
+theorem all_formulas_satisfiable:
+  fixes S :: "'a \<Rightarrow> 'b set" and I :: "'a set"
+  assumes "\<exists>g. enumeration (g:: nat \<Rightarrow>'a)" and "\<exists>h. enumeration (h:: nat \<Rightarrow>'b)" 
+  and "\<forall>i\<in>I. finite (S i)"
+  and "\<forall>J\<subseteq>I. finite J \<longrightarrow>  card J \<le> card (\<Union> (S ` J))"
+shows "satisfiable (\<T> S I)"
+(*<*)
+proof- 
+  have "\<forall> A. A \<subseteq> (\<T> S I) \<and> (finite A) \<longrightarrow> satisfiable A"
+  proof(rule allI, rule impI) 
+    fix A assume "A \<subseteq> (\<T> S I) \<and> (finite A)"
+    hence hip1:  "A \<subseteq> (\<T> S I)" and  hip2: "finite A" by auto
+    show "satisfiable A"
+    proof -
+      have 0: "\<forall>i\<in>I. (S i)\<noteq>{}" using assms(4) all_nonempty_sets1 by auto
+      hence 1: "(indices_set_formulas A)\<subseteq>I"  
+        using assms(3) hip1 indices_subset_formulas[of I S A] by auto
+      have 2: "finite (indices_set_formulas A)" 
+        using hip2 finite_set_indices by auto
+      have 3: "card (indices_set_formulas A) \<le>
+                 card(\<Union> (S ` (indices_set_formulas A)))"
+        using 1 2 assms(4) by auto
+      have "\<forall>J\<subseteq>(indices_set_formulas A). card J \<le> card(\<Union> (S ` J))"
+     proof(rule allI)
+       fix J
+       show "J \<subseteq> indices_set_formulas A \<longrightarrow> card J \<le> card (\<Union> (S ` J)) "
+       proof(rule impI)
+         assume hip: "J\<subseteq>(indices_set_formulas A)"              
+       hence 4: "finite J" 
+         using 2  rev_finite_subset by auto 
+       have "J\<subseteq>I" using hip 1 by auto
+       thus "card J \<le> card (\<Union> (S ` J))" using 4  assms(4) by auto      
+     qed
+   qed
+   thus "satisfiable A"
+     using 0 assms(3) hip1 hip2 finite_is_satisfiable[of I S A]  by auto
+ qed
+qed
+  thus "satisfiable (\<T> S I)" using 
+  Compacteness_Theorem[OF  EnumFormulasHall[OF
+  `\<exists>g. enumeration (g:: nat \<Rightarrow>'a)`  `\<exists>h. enumeration (h:: nat \<Rightarrow>'b)` ],
+       of "(\<T> S I)"]
+    by auto
+qed
+(*>*)
+text\<open>
+El siguiente teorema afirma que si $(\mathcal{T}\,  S\, I)$ es satisfiable
+ entonces la co\-rrespondiente colección
+de conjuntos finitos  determinada por $S$ e $I$ tiene un sistema de representantes distintos.
+\<close>
+text\<open> Para la demostración se define la siguiente función, 
+\<close>
+fun SDR ::  "(('a \<times> 'b) \<Rightarrow> v_truth) \<Rightarrow> ('a \<Rightarrow> 'b set) \<Rightarrow> 'a set \<Rightarrow> ('a \<Rightarrow>'b )"
+  where
+"SDR M S I = (\<lambda>i. (THE x. (t_v_evaluation M (atom (i,x)) = Ttrue) \<and> x\<in>(S i)))"
+text\<open> y se demuestra el siguiente lema que formaliza la existencia de tal función.
+\<close>
+(*<*)
+
+lemma existence_representants:
+ assumes "i \<in> I" and "M model (\<F> S I)" and "finite(S i)"  
+  shows "\<exists>x. (t_v_evaluation M (atom (i,x)) = Ttrue) \<and>  x \<in> (S i)" 
+proof- 
+  from  `i \<in> I`  
+  have  "(disjunction_atomic (set_to_list (S i)) i) \<in> (\<F> S I)" 
+    by(unfold \<F>_def,auto)
+  hence "t_v_evaluation M (disjunction_atomic(set_to_list (S i)) i) = Ttrue"
+    using assms(2) model_def[of M "\<F> S I"] by auto 
+  hence 1: "\<exists>x. x \<in> set (set_to_list (S i)) \<and> (t_v_evaluation M (atom (i,x)) = Ttrue)"
+    using t_v_evaluation_atom[of M "(set_to_list (S i))" i] by auto
+  thus  "\<exists>x. (t_v_evaluation M (atom (i,x)) = Ttrue) \<and>  x \<in> (S i)" 
+    using   `finite(S i)` set_set_to_list[of "(S i)"] by auto
+qed
+
+lemma unicity_representants:
+  shows  "\<forall>y.(x\<in>(S i) \<and> y\<in>(S i) \<and>  x\<noteq>y \<and> i\<in>I) \<longrightarrow>
+          (\<not>.(atom (i,x) \<and>. atom(i,y))\<in> (\<G> S I))"
+proof(rule allI) 
+  fix y
+  show "x\<in>(S i) \<and> y\<in>(S i) \<and>  x\<noteq>y \<and> i\<in>I \<longrightarrow> 
+       (\<not>.(atom (i,x) \<and>. atom(i,y))\<in> (\<G> S I))"
+  proof(rule impI)
+    assume "x\<in>(S i) \<and> y\<in>(S i) \<and>  x\<noteq>y \<and> i\<in>I"
+    thus  "\<not>.(atom (i,x) \<and>. atom(i,y)) \<in> (\<G> S I)"
+   by(unfold \<G>_def, auto)
+  qed
+qed
+
+lemma unicity_selection_representants:
+ assumes "i \<in> I" and "M model (\<G> S I)" 
+  shows  "\<forall>y.(x\<in>(S i) \<and> y\<in>(S i) \<and>  x\<noteq>y \<and> i\<in>I) \<longrightarrow> 
+  (t_v_evaluation M (\<not>.(atom (i,x) \<and>. atom(i,y))) = Ttrue)"
+proof-
+  have   "\<forall>y.(x\<in>(S i) \<and> y\<in>(S i) \<and>  x\<noteq>y \<and> i\<in>I) \<longrightarrow> 
+  (\<not>.(atom (i,x) \<and>. atom(i,y))\<in> (\<G> S I))"
+    using unicity_representants[of x S i] by auto
+  thus  "\<forall>y.(x\<in>(S i) \<and> y\<in>(S i) \<and>  x\<noteq>y \<and> i\<in>I) \<longrightarrow> 
+  (t_v_evaluation M (\<not>.(atom (i,x) \<and>. atom(i,y))) = Ttrue)"
+    using assms(2)  model_def[of M "\<G> S I"] by blast
+qed
+
+lemma uniqueness_satisfaction:
+  assumes "t_v_evaluation M (atom (i,x)) = Ttrue \<and> x\<in>(S i)" and
+  "\<forall>y. y \<in> (S i) \<and> x\<noteq>y  \<longrightarrow>  t_v_evaluation M (atom (i, y)) = Ffalse"  
+shows "\<forall>z. t_v_evaluation M (atom (i, z)) = Ttrue \<and> z\<in>(S i) \<longrightarrow> z = x"
+proof(rule allI)
+  fix z 
+  show "t_v_evaluation M (atom (i, z)) = Ttrue \<and> z \<in> S i  \<longrightarrow> z = x" 
+  proof(rule impI)
+    assume hip: "t_v_evaluation M (atom (i, z)) = Ttrue \<and> z \<in> (S i)"  
+    show "z = x"
+    proof(rule ccontr)
+      assume 1: "z \<noteq> x"
+      have   2: "z \<in> (S i)" using hip by auto
+      hence  "t_v_evaluation M (atom(i,z)) =  Ffalse" using 1 assms(2) by auto
+      thus False using hip by auto
+    qed
+  qed
+qed
+
+lemma uniqueness_satisfaction_in_Si:
+  assumes "t_v_evaluation M (atom (i,x)) = Ttrue \<and> x\<in>(S i)" and
+  "\<forall>y. y \<in> (S i) \<and> x\<noteq>y \<longrightarrow> (t_v_evaluation M (\<not>.(atom (i,x) \<and>. atom(i,y))) = Ttrue)"
+  shows "\<forall>y. y \<in> (S i)  \<and> x\<noteq>y  \<longrightarrow>  t_v_evaluation M (atom (i, y)) = Ffalse"
+proof(rule allI, rule impI)
+  fix y
+  assume hip: "y \<in> S i \<and> x \<noteq> y"
+  show "t_v_evaluation M (atom (i, y)) = Ffalse"
+  proof(rule ccontr)
+    assume "t_v_evaluation M (atom (i, y)) \<noteq> Ffalse" 
+    hence "t_v_evaluation M (atom (i, y)) = Ttrue" using CasosValor by blast
+    hence 1: "t_v_evaluation M (atom (i,x) \<and>. atom(i,y))  = Ttrue"
+      using assms(1) v_conjunction_def by auto
+    have "t_v_evaluation M (\<not>.(atom (i,x) \<and>. atom(i,y))) = Ttrue"
+      using hip assms(2) by auto
+    hence "t_v_evaluation M (atom (i,x) \<and>. atom(i,y)) = Ffalse" 
+      using ValoresNegacion2  by blast
+    thus False using 1  by auto
+  qed      
+qed
+
+lemma uniqueness_aux1:
+  assumes  "t_v_evaluation M (atom (i,x)) = Ttrue \<and> x\<in>(S i)"
+  and  "\<forall>y. y \<in> (S i) \<and> x\<noteq>y \<longrightarrow> (t_v_evaluation M (\<not>.(atom (i,x) \<and>. atom(i,y))) = Ttrue)"
+shows "\<forall>z. t_v_evaluation M (atom (i, z)) = Ttrue \<and> z\<in>(S i) \<longrightarrow> z = x" 
+  using assms uniqueness_satisfaction_in_Si[of M i x ]  uniqueness_satisfaction[of M i x] by blast 
+
+lemma uniqueness_aux2:
+  assumes "t_v_evaluation M (atom (i,x)) = Ttrue \<and> x\<in>(S i)" and
+  "(\<And>z.(t_v_evaluation M (atom (i, z)) = Ttrue \<and> z\<in>(S i))  \<Longrightarrow> z = x)"
+shows "(THE a. (t_v_evaluation M (atom (i,a)) = Ttrue) \<and> a\<in>(S i)) = x" 
+  using assms by(rule the_equality)
+
+lemma uniqueness_aux:
+  assumes  "t_v_evaluation M (atom (i,x)) = Ttrue \<and> x\<in>(S i)" and
+  "\<forall>y. y \<in> (S i) \<and> x\<noteq>y \<longrightarrow> (t_v_evaluation M (\<not>.(atom (i,x) \<and>. atom(i,y))) = Ttrue)"
+shows  "(THE a. (t_v_evaluation M (atom (i,a)) = Ttrue) \<and> a\<in>(S i)) = x" 
+  using assms  uniqueness_aux1[of M i x ] uniqueness_aux2[of M i x] by blast
+(*>*)
+lemma function_SDR:
+  assumes "i \<in> I" and "M model (\<F> S I)" and "M model (\<G> S I)" and "finite(S i)"
+shows "\<exists>!x. (t_v_evaluation M (atom (i,x)) = Ttrue) \<and>  x \<in> (S i) \<and> SDR M S I i = x" 
+(*<*)
+proof- 
+  have  "\<exists>x. (t_v_evaluation M (atom (i,x)) = Ttrue) \<and>  x \<in> (S i)" 
+    using assms(1-2,4) existence_representants by auto 
+  then obtain x where x: "(t_v_evaluation M (atom (i,x)) = Ttrue) \<and>  x \<in> (S i)"
+    by auto
+  moreover
+  have "\<forall>y.(x\<in>(S i) \<and> y\<in>(S i) \<and>  x\<noteq>y \<and> i\<in>I) \<longrightarrow> 
+  (t_v_evaluation M (\<not>.(atom (i,x) \<and>. atom(i,y))) = Ttrue)" 
+    using assms(1,3) unicity_selection_representants[of i I M S]  by auto
+  hence "(THE a. (t_v_evaluation M (atom (i,a)) = Ttrue) \<and> a\<in>(S i)) = x"
+   using x  `i \<in> I`  uniqueness_aux[of M i x] by auto 
+  hence "SDR M S I i = x"  by auto
+  hence "(t_v_evaluation M (atom (i,x)) = Ttrue \<and> x \<in> (S i)) \<and> SDR M S I i = x"
+    using x by auto
+  thus ?thesis  by auto
+qed
+
+lemma aux_for_\<H>_formulas:
+  assumes
+  "(t_v_evaluation M (atom (i,a)) = Ttrue) \<and> a \<in> (S i)"
+  and "(t_v_evaluation M (atom (j,b)) = Ttrue) \<and> b \<in> (S j)" 
+  and  "i\<in>I \<and> j\<in>I \<and> i\<noteq>j" 
+  and "(a \<in> (S i) \<inter> (S j) \<and> i\<in>I \<and> j\<in>I \<and> i\<noteq>j \<longrightarrow>
+  (t_v_evaluation M (\<not>.(atom (i,a) \<and>. atom(j,a))) = Ttrue))"
+  shows  "a \<noteq> b"
+proof(rule ccontr)
+  assume  "\<not> a \<noteq> b" 
+  hence hip: "a=b" by auto
+  hence "t_v_evaluation M (atom (i, a)) = Ttrue" and  "t_v_evaluation M (atom (j, a)) = Ttrue"
+    using assms by auto
+  hence "t_v_evaluation M (atom (i, a) \<and>. atom(j,a)) = Ttrue" using v_conjunction_def
+    by auto
+  hence "t_v_evaluation M (\<not>.(atom (i, a) \<and>. atom(j,a))) = Ffalse" 
+    using v_negation_def by auto
+  moreover
+  have  "a \<in> (S i) \<inter> (S j)" using hip assms(1-2) by auto
+  hence "t_v_evaluation M (\<not>.(atom (i, a) \<and>. atom(j, a))) = Ttrue" 
+    using assms(3-4) by auto
+  ultimately show False by auto
+qed
+
+lemma model_of_all:
+  assumes  "M model (\<T> S I)"
+  shows  "M model (\<F> S I)" and  "M model (\<G> S I)" and  "M model (\<H> S I)" 
+proof(unfold model_def)
+  show "\<forall>F\<in>\<F> S I. t_v_evaluation M F = Ttrue"
+  proof
+    fix F
+    assume "F\<in> (\<F> S I)" hence "F\<in>(\<T> S I)" by(unfold \<T>_def, auto) 
+    thus "t_v_evaluation M F = Ttrue" using assms by(unfold model_def, auto)
+  qed
+next
+  show "\<forall>F\<in>(\<G> S I). t_v_evaluation M F = Ttrue"
+  proof
+    fix F
+    assume "F\<in>(\<G> S I)" hence "F\<in>(\<T> S I)" by(unfold \<T>_def, auto) 
+    thus "t_v_evaluation M F = Ttrue" using assms by(unfold model_def, auto)
+  qed
+next
+  show "\<forall>F\<in>(\<H> S I). t_v_evaluation M F = Ttrue"
+  proof
+    fix F
+    assume "F\<in>(\<H> S I)" hence "F\<in>(\<T> S I)" by(unfold \<T>_def, auto) 
+    thus "t_v_evaluation M F = Ttrue" using assms by(unfold model_def, auto)
+  qed
+qed
+(*>*)
+text\<open>
+\<close>
+(*<*)
+lemma sets_have_distinct_representants:
+  assumes
+  hip1: "i\<in>I" and  hip2: "j\<in>I" and  hip3: "i\<noteq>j" and  hip4: "M model (\<T> S I)"
+  and hip5: "finite(S i)" and  hip6: "finite(S j)"
+shows "SDR M S I i  \<noteq>  SDR M S I j" 
+proof-
+  have 1: "M model \<F> S I" and 2:  "M model \<G> S I"
+    using hip4 model_of_all by auto
+  hence "\<exists>!x. (t_v_evaluation M (atom (i,x)) = Ttrue) \<and> x \<in> (S i) \<and> SDR M S I i = x"
+    using  hip1  hip4  hip5 function_SDR[of i I M S] by auto  
+  then obtain x where
+  x1: "(t_v_evaluation M (atom (i,x)) = Ttrue) \<and> x \<in> (S i)" and x2: "SDR M S I i = x"
+    by auto 
+  have "\<exists>!y. (t_v_evaluation M (atom (j,y)) = Ttrue) \<and> y \<in> (S j) \<and> SDR M S I j = y"
+  using 1 2  hip2  hip4  hip6 function_SDR[of j I M S] by auto   
+  then obtain y where
+  y1: "(t_v_evaluation M (atom (j,y)) = Ttrue) \<and> y \<in> (S j)" and y2: "SDR M S I j = y"
+    by auto
+  have "(x \<in> (S i) \<inter> (S j) \<and> i\<in>I \<and> j\<in>I \<and> i\<noteq>j) \<longrightarrow>
+  (\<not>.(atom (i,x) \<and>. atom(j,x))\<in> (\<H> S I))"
+    by(unfold  \<H>_def, auto)
+  hence "(x \<in> (S i) \<inter> (S j) \<and> i\<in>I \<and> j\<in>I \<and> i\<noteq>j) \<longrightarrow>
+  (\<not>.(atom (i,x) \<and>. atom(j,x)) \<in> (\<T> S I))"
+    by(unfold  \<T>_def, auto)
+  hence "(x \<in> (S i) \<inter> (S j) \<and> i\<in>I \<and> j\<in>I \<and> i\<noteq>j) \<longrightarrow>
+  (t_v_evaluation M (\<not>.(atom (i,x) \<and>. atom(j,x))) = Ttrue)" 
+    using hip4 model_def[of M "\<T> S I"] by auto
+  hence "x \<noteq> y" using x1 y1 assms(1-3) aux_for_\<H>_formulas[of M i x  S  j y I] 
+    by auto
+  thus ?thesis using x2 y2 by auto
+qed  
+(*>*)
+text\<open>
+\<close>
+lemma satisfiable_representant:
+  assumes "satisfiable (\<T> S I)" and "\<forall>i\<in>I. finite (S i)"
+  shows "\<exists>R. system_representatives S I R"
+(*<*)
+proof-
+  from assms have "\<exists>M. M model (\<T> S I)"  by(unfold satisfiable_def)
+  then obtain M where M: "M model (\<T> S I)" by auto 
+  hence  "system_representatives S I (SDR M S I)" 
+  proof(unfold system_representatives_def) 
+    show "(\<forall>i\<in>I. (SDR M S I i) \<in> (S i)) \<and> inj_on (SDR M S I) I" 
+    proof(rule conjI)
+      show "\<forall>i\<in>I. (SDR M S I i) \<in> (S i)"
+      proof 
+        fix i
+        assume i: "i \<in> I"
+        have "M model \<F> S I" and 2: "M model \<G> S I" using M model_of_all
+          by auto
+        thus "(SDR M S I i) \<in> (S i)"
+          using i M assms(2) model_of_all[of M S I]
+                  function_SDR[of i I M S ] by auto 
+      qed
+    next
+      show "inj_on (SDR M S I) I"
+      proof(unfold  inj_on_def)
+        show "\<forall>i\<in>I. \<forall>j\<in>I. SDR M S I i = SDR M S I j \<longrightarrow> i = j"
+        proof 
+          fix i 
+          assume 1:  "i \<in> I"
+          show "\<forall>j\<in>I. SDR M S I i = SDR M S I j \<longrightarrow> i = j"
+          proof 
+            fix j
+            assume 2:  "j \<in> I"
+            show "SDR M S I i = SDR M S I j \<longrightarrow> i = j"
+            proof(rule ccontr)
+              assume  "\<not> (SDR M S I i = SDR M S I j \<longrightarrow> i = j)"
+              hence 5:  "SDR M S I i = SDR M S I j" and 6:  "i\<noteq> j" by auto
+              have  3: "finite(S i)" and 4: "finite(S j)" using 1 2  assms(2) by auto
+              have "SDR M S I i \<noteq> SDR M S I j"
+                using 1 2 3 4 6 M sets_have_distinct_representants[of i I j M S] by auto
+              thus False  using 5 by auto
+            qed
+          qed 
+        qed
+      qed
+    qed
+  qed
+  thus  "\<exists>R. system_representatives S I R" by auto
+qed
+(*>*)
+text\<open>
+Por último tenemos la formalización del teorema de Hall.
+\<close>
+theorem Hall:
+  fixes S :: "'a \<Rightarrow> 'b set" and I :: "'a set"
+  assumes "\<exists>g. enumeration (g:: nat \<Rightarrow>'a)" and "\<exists>h. enumeration (h:: nat \<Rightarrow>'b)" 
+  and Finite: "\<forall>i\<in>I. finite (S i)"
+  and Marriage: "\<forall>J\<subseteq>I. finite J \<longrightarrow>  card J \<le> card (\<Union> (S ` J))"
+ shows "\<exists>R. system_representatives S I R"
+proof-  
+  have "satisfiable (\<T> S I)" using assms all_formulas_satisfiable[of I] by auto
+  thus ?thesis using Finite Marriage satisfiable_representant[of S I] by auto
+qed
+
+(*<*)
+end
+(*>*)
