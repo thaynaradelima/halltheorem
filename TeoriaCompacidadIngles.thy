@@ -2,7 +2,7 @@
 theory TeoriaCompacidadIngles
 (*<*)
   imports Main 
-"~/Dropbox/ExistenciaModelosIngles/ExistenciaModeloIngles"
+"ExistenciaModelosIngles/ExistenciaModeloIngles"
 (*"/Users/ayala/Dropbox/ExistenciaModelosIngles/ExistenciaModeloIngles"*)
 begin
 (*>*)
