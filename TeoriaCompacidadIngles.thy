@@ -3,7 +3,7 @@ theory TeoriaCompacidadIngles
 (*<*)
   imports Main 
 "ExistenciaModelosIngles/ExistenciaModeloIngles"
-(*"/Users/ayala/Dropbox/ExistenciaModelosIngles/ExistenciaModeloIngles"*)
+
 begin
 (*>*)
 section \<open> Teorema de compacidad \<close>
